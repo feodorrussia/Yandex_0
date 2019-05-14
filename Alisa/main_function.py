@@ -97,13 +97,18 @@ def handle_dialog(request, response, user_storage, database):
             database.update_status_system('monitoring_tasks', request.user_id)
             return message_return(response, user_storage, output_message)
 
-    if 'назначить задачу номер' in input_message and len(input_message.strip().split(' ')) == 5:
+    if 'назначить задачу номер' in input_message and len(input_message.strip().split(' ')) == 6:
         task_id = int(input_message.strip().split(' ')[3])
         task = Task.query.filter_by(id=task_id).first()
         user = User.query.filter_by(username=input_message.strip().split(' ')[-1]).first()
         if task:
             if user:
                 task.performer_id += ';'+str(user.id)
+                out_message = 'Пользователь не найден('
+            else:
+                out_message = 'Задача не найдена('
+        else:
+            out_message = ''
         user_storage = {'suggests': ['Посмотреть задачи', 'Добавить задачу', 'Помощь']}
         database.update_status_system('first', request.user_id)
         return message_return(response, user_storage, output_message)
@@ -111,7 +116,7 @@ def handle_dialog(request, response, user_storage, database):
     if 'покажи задачу номер' in input_message and len(input_message.strip().split(' ')) == 4:
         task_id = int(input_message.strip().split(' ')[-1])
         task = Task.query.filter_by(id=task_id).first()
-        output_message = "Прошу! Ваша задача:\n" + '\n'.join(['Название: '+str(task.title), 'Описание: '+str(task.description)[:500], 'Дата выполнения: '+str(task.deadline), 'Исполнители: '+str('; '.join([User.query.filter_by(id=int(x)).first().username for x in task.performer_id.split(';')]))])
+        output_message = "Прошу! Ваша задача:\n" + '\n'.join(['Название: '+str(task.title), 'Описание: '+str(task.description)[:500], 'Дата выполнения: '+str(task.deadline), 'Исполнители: '+str('; '.join([User.query.filter_by(id=int(x)).first().username for x in str(task.performer_id).split(';')]))])
         user_storage = {'suggests': ['Посмотреть задачи', 'Добавить задачу', 'Помощь']}
         database.update_status_system('first', request.user_id)
         return message_return(response, user_storage, output_message)
@@ -135,7 +140,7 @@ def handle_dialog(request, response, user_storage, database):
         task = Task(user_id=user.id, title=title,
                         description='',
                         deadline='',
-                        performer_id=user.id,
+                        performer_id=str(user.id),
                         category_id=0)
         db.session.add(task)
         db.session.commit()

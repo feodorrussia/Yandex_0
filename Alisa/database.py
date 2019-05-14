@@ -18,7 +18,7 @@ class Task(db.Model):
     description = db.Column(db.String(1000), unique=False, nullable=False)
     deadline = db.Column(db.String(50), unique=False, nullable=False)
 
-    performer_id = db.Column(db.Integer, unique=False, nullable=True)
+    performer_id = db.Column(db.String(1000), unique=False, nullable=True)
     category_id = db.Column(db.Integer, unique=False, nullable=True)
     priority = db.Column(db.String(10), unique=False, nullable=True)
     step = db.Column(db.String(100), unique=False, nullable=True)
@@ -34,3 +34,4 @@ class Category(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     category = db.Column(db.String(50), unique=True, nullable=False)
 db.create_all()
+
