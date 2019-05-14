@@ -7,8 +7,11 @@ from loginform import *
 from add_news import *
 from database import *
 from task_form import TaskModel
-import datetime
+from datetime import datetime
 
+
+admins = db.session.query(Admins).all()
+admins_id = [i.user_id for i in admins]
 
 @app.route('/', methods=['GET', 'POST'])
 @app.route('/index')
@@ -18,12 +21,15 @@ def index():
 
     tasks = db.session.query(Task).filter_by(user_id=session['user_id'])
 
-    user_name = database.get_session(request.user_id, 'user_name')[0]
+    user_name = session['username']
     user = User.query.filter_by(username=user_name).first()
     task = Task.query.filter_by(user_id=user.id).all()
-    bad = [x for x in task if datetime.strptime(x.deadline, '%m %d %Y, %H:%M:%S') < datetime.now()]
+    bad = [x for x in task if datetime.strptime(x.deadline, '%d.%m.%Y %H:%M') < datetime.now()]
+    print(session['user_id'])
+    admins = db.session.query(Admins).all()
+    admins_id = [i.user_id for i in admins]
     return render_template('index.html', username=session['username'],
-                           news=tasks, bad=bad)
+                           news=tasks, bad=bad, user_id=session['user_id'], admins_id=admins_id)
 
 
 @app.route('/register', methods=['POST', 'GET'])
@@ -152,7 +158,7 @@ def add_task(f):
             task = db.session.query(Task).filter_by(user_id=session['user_id']).all()[f-1]
             task.title = form.title.data
             task.description = form.description.data
-            task.deadline = form.deadline.data
+            task.deadline = form.deadline.data.strftime('%d.%m.%Y %H:%M')
             task.performer_name = form.performer_name.data
             task.category_name = form.category_name.data
             task.priority = form.priority.data
@@ -170,6 +176,31 @@ def add_task(f):
                                    form=form, username=session['username'])
 
 
+@app.route('/site_users')
+def site_users():
+    if 'username' not in session:
+        return redirect('/login')
+    admins = db.session.query(Admins).all()
+    admins_id = [i.user_id for i in admins]
+    if session['user_id'] not in admins_id:
+        return redirect('/')
+    all_users = db.session.query(User).all()
+    print(admins_id)
+    return render_template('site_users.html', users=all_users, admins_id=admins_id, username=session['username'],
+                           user_id=session['user_id'])
+
+
+@app.route('/set_admin/<user_id>')
+def set_admin(user_id):
+    admin = Admins(user_id=user_id)
+    db.session.add(admin)
+    db.session.commit()
+    all_users = db.session.query(User).all()
+    admins = db.session.query(Admins).all()
+    admins_id = [i.user_id for i in admins]
+    print(admins_id)
+    return render_template('site_users.html', users=all_users, admins_id=admins_id, username=session['username'],
+                           user_id=session['user_id'])
 
 
 @app.route('/delete_task/<int:news_id>', methods=['GET'])
