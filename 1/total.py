@@ -3,14 +3,13 @@ from flask import Flask, url_for, session, redirect, render_template, request, j
     make_response, \
     request
 from werkzeug.security import generate_password_hash
+from database import *
+from constants import *
 import os
 import datetime
 from json import load
 
-app = Flask(__name__)
-app.secret_key = 'any random string'
-UPLOAD_FOLDER = "Загрузки"
-delivery = {'Курьером(по г.Пенза)': 1, 'Почта России': 2, 'DPD': 3}
+
 
 
 @app.route('/')
@@ -45,7 +44,7 @@ def register():
         user_name = form.user_name.data
         password = form.password.data
         password_check = form.password_check.data
-        user = ''
+        user = User()
         flag = user.is_username_busy(user_name)
         if flag and password == password_check:
             user.insert(user_name, password)
