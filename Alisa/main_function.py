@@ -8,9 +8,11 @@ par_task=['id', 'user_id', 'title', 'description', 'deadline', 'performer_id', '
 def handle_dialog(request, response, user_storage, database):
     input_message = request.command.lower()
 
+    if request.user_id not in database.get_session(all=True):
+        database.add_session(request.user_id)
+
     if request.is_new_session or input_message in ['войти', 'регистрация']:
-        output_message = "Здравствуйте, Вас приветствует Ваш коммуникатор Адель." \
-                         " Чтобы перейти к работе просто скажите мне свой логин и пароль через пробел."
+        output_message = "Привет! Чтобы увидеть свои задачи введи логин и пароль через пробел."
         user_storage = {'suggests': ['Помощь']}
         database.update_status_system('login', request.user_id)
         return message_return(response, user_storage, output_message)
@@ -34,9 +36,8 @@ def handle_dialog(request, response, user_storage, database):
             output_message = "Пользователь не найден("
             user_storage = {'suggests': ['Помощь']}
             return message_return(response, user_storage, output_message)
-    status = database.get_session(request.user_id, 'status_action')[0]
 
-    if status == 'first':
+    if database.get_session(request.user_id, 'status_action')[0] == 'first':
         if input_message == 'покажи мои задачи':
             user_name = database.get_session(request.user_id, 'user_name')
             user_id = User.query.filter_by(username=user_name).first()
@@ -55,3 +56,9 @@ def handle_dialog(request, response, user_storage, database):
             database.add_sessions(request.user_id, input_message[0])
             database.update_status_system('first', request.user_id)
             return message_return(response, user_storage, output_message)'''
+
+    buttons, user_storage = get_suggests(user_storage)
+    return message_error(response, user_storage,
+                         ['Конфуз;) Я ещё в разработке', 'Ой, сейчас исправлю)'
+                          ])
+

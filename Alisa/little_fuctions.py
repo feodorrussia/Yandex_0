@@ -1,6 +1,6 @@
 import requests
 import random
-import ujson
+import json
 
 API_CODE = 'dict.1.1.20190331T101514Z.9cbf4535b1122019.dbd3fb8c0fded55cd45d1f44459bbfda21d8e82a'
 BASIC_REQUEST = 'https://dictionary.yandex.net/api/v1/dicservice.json/lookup?' \
@@ -43,7 +43,7 @@ def message_error(response, user_storage, answer):
 
 
 def read_answers_data(name: str) -> dict:
-    return ujson.load(open(name + ".json", encoding="utf-8"))
+    return json.load(open(name + ".json", encoding="utf-8"))
 
 
 def choice_wrd(last_char, used_words):

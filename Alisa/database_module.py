@@ -19,12 +19,12 @@ class DatabaseManager:
     def __del__(self):
         self.connection.close()
 
-    def add_session(self, user_id, user_name):
+    def add_session(self, user_id):
         cursor = self.connection.cursor()
         try:
             cursor.execute(
                 '''INSERT INTO sessions  VALUES(:user_id, :user_name, :status_action)''',
-                {'user_id': ''.join([str(x) for x in user_id]), 'user_name': user_name, 'status_action': "login"})
+                {'user_id': ''.join([str(x) for x in user_id]), 'user_name': '', 'status_action': "login"})
         except sqlite3.DatabaseError as error:
             print('Error: ', error, '6')
             cursor.close()
