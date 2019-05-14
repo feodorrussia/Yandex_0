@@ -14,8 +14,10 @@ delivery = {'Курьером(по г.Пенза)': 1, 'Почта России'
 @app.route('/')
 @app.route('/title')
 def title():
+    session.pop('username', 0)
+    session.pop('user_id', 0)
     if 'username' not in session:
-        return render_template('title_out.html', text1=open('text_init.txt').read())
+        return render_template('title_out.html')
     if session['user_id'] == 1:
         return redirect("/title_admin")
     return render_template('title_in.html', text1=open('text_init.txt').read(),
@@ -30,3 +32,7 @@ def login():
 @app.route('/register')
 def register():
     pass
+
+
+if __name__ == '__main__':
+    app.run(port=8080, host='127.0.0.1')
