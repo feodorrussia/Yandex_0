@@ -97,14 +97,24 @@ def handle_dialog(request, response, user_storage, database):
             database.update_status_system('monitoring_tasks', request.user_id)
             return message_return(response, user_storage, output_message)
 
-    '''if 'покажи задачу номер' in input_message and input_message.strip().split(' ') == 4:
+    if 'назначить задачу номер' in input_message and len(input_message.strip().split(' ')) == 5:
+        task_id = int(input_message.strip().split(' ')[3])
+        task = Task.query.filter_by(id=task_id).first()
+        user = User.query.filter_by(username=input_message.strip().split(' ')[-1]).first()
+        if task:
+            if user:
+                task.performer_id += ';'+str(user.id)
+        user_storage = {'suggests': ['Посмотреть задачи', 'Добавить задачу', 'Помощь']}
+        database.update_status_system('first', request.user_id)
+        return message_return(response, user_storage, output_message)
+
+    if 'покажи задачу номер' in input_message and len(input_message.strip().split(' ')) == 4:
         task_id = int(input_message.strip().split(' ')[-1])
         task = Task.query.filter_by(id=task_id).first()
-        output_message = f"Прошу! Ваша задача:\n" + '\n'.join([str(task.name), str(task.description)[:500], str(task.deadline), str(task.)])
+        output_message = "Прошу! Ваша задача:\n" + '\n'.join(['Название: '+str(task.title), 'Описание: '+str(task.description)[:500], 'Дата выполнения: '+str(task.deadline), 'Исполнители: '+str('; '.join([User.query.filter_by(id=int(x)).first().username for x in task.performer_id.split(';')]))])
         user_storage = {'suggests': ['Посмотреть задачи', 'Добавить задачу', 'Помощь']}
-        database.add_sessions(request.user_id, input_message[0])
         database.update_status_system('first', request.user_id)
-        return message_return(response, user_storage, output_message)'''
+        return message_return(response, user_storage, output_message)
 
     if input_message in ['добавить', 'добавить задачу']:
         output_message = "Хорошо! Говори название"
@@ -169,4 +179,4 @@ def handle_dialog(request, response, user_storage, database):
     buttons, user_storage = get_suggests(user_storage)
     return message_error(response, user_storage,
                          ['Конфуз;) Я ещё в разработке', 'Ой, сейчас исправлю)'
-                          ])
+                          ])                          ])
