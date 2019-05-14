@@ -125,7 +125,7 @@ def handle_dialog(request, response, user_storage, database):
         task = Task(user_id=user.id, title=title,
                         description='',
                         deadline='',
-                        performer_id=user.id
+                        performer_id=user.id,
                         category_id=0)
         db.session.add(task)
         db.session.commit()
