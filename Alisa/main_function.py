@@ -71,7 +71,7 @@ def handle_dialog(request, response, user_storage, database):
         user = User.query.filter_by(username=user_name).first()
         task = Task.query.filter_by(user_id=user.id).all()
         if len(task)>0:
-            output_message = "Прошу! Ваши задачи:\n" + '\n'.join([str(x.title)+"\n  "+str(x.id)+"\n  "+str(x.deadline) for x in task])
+            output_message = "Прошу! Ваши задачи:\n" + '\n'.join(['Название: '+str(x.title)+"\n  Id: "+str(x.id)+"\n  Время выполнения: "+str(x.deadline) for x in task])
             user_storage = {'suggests': ['Помощь', 'Главная']}
             database.update_status_system('monitoring_tasks', request.user_id)
             return message_return(response, user_storage, output_message)
@@ -87,7 +87,7 @@ def handle_dialog(request, response, user_storage, database):
         task = Task.query.filter_by(user_id=user.id).all()
         task = [x for x in task if datetime.strptime(x.deadline, '%d.%m.%Y %H:%M')<datetime.now()]
         if len(task)>0:
-            output_message = "Прошу! Ваши задачи:\n" + '\n'.join([str(x.title)+"\n  "+str(x.id)+"\n  "+str(x.deadline) for x in task ])
+            output_message = "Прошу! Ваши задачи:\n" + '\n'.join(['Название: '+str(x.title)+"\n  Id: "+str(x.id)+"\n  Время выполнения: "+str(x.deadline) for x in task ])
             user_storage = {'suggests': ['Помощь', 'Главная']}
             database.update_status_system('monitoring_tasks', request.user_id)
             return message_return(response, user_storage, output_message)
@@ -119,7 +119,16 @@ def handle_dialog(request, response, user_storage, database):
         return message_return(response, user_storage, output_message)
 
     if database.get_session(request.user_id, 'status_action')[0] == 'add_task_name':
-        name = request.command
+        title = request.command
+        user_name = database.get_session(request.user_id, 'user_name')[0]
+        user = User.query.filter_by(username=user_name).first()
+        task = Task(user_id=user.id, title=title,
+                        description='',
+                        deadline='',
+                        performer_name='')
+        db.session.add(task)
+        db.session.commit()
+        database.update_status_system(Task.query.filter_by(title=title).all()[-1].id, request.user_id, 'id_connect_task')
         output_message = "Хорошо! Говори описание"
         user_storage = {'suggests': ['Отмена', 'Помощь', 'Главная']}
         database.update_status_system('add_task_description', request.user_id)
@@ -127,6 +136,9 @@ def handle_dialog(request, response, user_storage, database):
 
     if database.get_session(request.user_id, 'status_action')[0] == 'add_task_description':
         description = request.command
+        task_id = database.get_session(request.user_id, 'id_connect_task')[0]
+        Task.query.filter_by(id=task_id).first().description = description
+        db.session.commit()
         output_message = "Хорошо! Говори категорию"
         user_storage = {'suggests': ['Отмена', 'Помощь', 'Главная']+[str(x.category) for x in Category.query.all()]}
         database.update_status_system('add_task_category', request.user_id)
@@ -134,13 +146,19 @@ def handle_dialog(request, response, user_storage, database):
 
     if database.get_session(request.user_id, 'status_action')[0] == 'add_task_category':
         category_id = Category.query.filter_by(category=request.command).first().id
-        output_message = "Хорошо! Говори дату выполнения"
+        task_id = database.get_session(request.user_id, 'id_connect_task')[0]
+        Task.query.filter_by(id=task_id).first().category_id = category_id
+        db.session.commit()
+        output_message = 'Хорошо! Говори дату выполнения в формате "дд.мм.гггг ЧЧ:ММ"'
         user_storage = {'suggests': ['Отмена', 'Помощь', 'Главная']}
         database.update_status_system('add_task_deadline', request.user_id)
         return message_return(response, user_storage, output_message)
 
     if database.get_session(request.user_id, 'status_action')[0] == 'add_task_deadline':
         deadline = request.command
+        task_id = database.get_session(request.user_id, 'id_connect_task')[0]
+        Task.query.filter_by(id=task_id).first().deadline = deadline
+        db.session.commit()
         output_message = "Готово!"
         user_storage = {'suggests': ['Посмотреть задачи', 'Добавить задачу', 'Помощь', 'Главная']}
         database.update_status_system('add_task_finish', request.user_id)

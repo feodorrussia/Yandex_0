@@ -13,7 +13,8 @@ class DatabaseManager:
         cursor.execute('''CREATE TABLE IF NOT EXISTS sessions
                             (user_id TEXT,
                             user_name VARCHAR(50),
-                            status_action VARCHAR(50))''')
+                            status_action VARCHAR(50),
+                            id_connect_task INTEGER)''')
         cursor.close()
 
     def __del__(self):
