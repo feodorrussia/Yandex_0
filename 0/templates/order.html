@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+{%if session['user_id'] != 1%}
+<a class="navbar-brand" href="/myorders">Назад</a>
+{%else%}
+<a class="navbar-brand" href="/title_admin">Назад</a>
+{%endif%}
+<body>
+    <div>Название заказа: {{ item[1] }}</div>
+    <div>Номер заказ: {{ item[0] }}</div>
+    <div>Дата создания заказа: {{ item[6] }}</div>
+    <div>Статус заказа: {{ item[4] }}</div>
+    {%if item[4] == 'Доставка заказа'%}
+    <div>Вид доставки: {{ delivery[1] }}</div>
+    {%if delivery[3] %}
+    <div>Код доставки: {{ delivery[3] }}</div>
+    {%endif%}
+    <div>Цена заказа: {{ delivery[6] }}</div>
+    {%endif%}
+    <div>Описание заказа: {{ item[2] }}</div>
+</body>
+
+{% endblock %}
