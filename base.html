@@ -14,6 +14,9 @@
               <a class="navbar-brand" href="/">Просмотр задач</a>
               <a class="navbar-brand" href="/add_task/0">Добавить задачу</a>
           {% endif %}
+          {% if user_id in admins_id %}
+              <a class="navbar-brand" href="/site_users">Пользователи сайта</a>
+          {% endif %}
             {% if "username" in session %}
                          <a class="navbar-brand" href="/logout">Выйти из {{session['username']}}</a>
            {% endif %}

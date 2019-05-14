@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+
+
+{% block content %}
+    <div>
+  <table border="1" width="100%" cellpadding="6" >
+
+       <th>ID</th>
+      <th>USERNAME</th>
+      <th>PASSWORD</th>
+
+    {% for user in users%}
+      <tr>
+          <th>{{user.id}}</th>
+          <th>{{user.username}}</th>
+          <th>{{user.password}}</th>
+          {% if user.id in admins_id %}
+            <th style="color:blue"> admin</th>
+          {% endif %}
+            {% if user.id not in admins_id %}
+            <th style="color:green"> user</th>
+          {% endif %}
+            <th><p><strong> <a href="/set_admin/{{ user.id }}" style="color:red">Назначить админом</a></strong></p></th>
+      {% if user.block == 1 %}
+          <th><p><strong> <a href="/set_admin/{{ user.id }}" style="color:red">Назначить админом</a></strong></p></th>
+    </tr>
+
+    {% endfor %}
+       </table>
+    </div>
+      {% endblock %}
