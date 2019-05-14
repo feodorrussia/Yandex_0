@@ -18,8 +18,8 @@ class Task(db.Model):
     description = db.Column(db.String(1000), unique=False, nullable=False)
     deadline = db.Column(db.String(50), unique=False, nullable=False)
 
-    performer_name = db.Column(db.Integer, unique=False, nullable=True)
-    category_id = db.Column(db.Integer, unique=True, nullable=True)
+    performer_id = db.Column(db.Integer, unique=False, nullable=True)
+    category_id = db.Column(db.Integer, unique=False, nullable=True)
     priority = db.Column(db.String(10), unique=False, nullable=True)
     step = db.Column(db.String(100), unique=False, nullable=True)
     done = db.Column(db.Boolean, unique=False, nullable=True)
