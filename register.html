@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <h1>Регистрация</h1>
+    <form action="" method="post" novalidate>
+        {{ form.hidden_tag() }}
+
+        {% if error == 1 %}
+            <h4 style="color:red">Пользователь с таким именем уже зарегистрирован в системе. Исправьте данные</h4>
+        {% endif %}
+
+        {% if error == 2 %}
+            <h4 style="color:red">Пароли не совпадают. Попробуйте еще раз</h4>
+        {% endif %}
+
+        {% if error == 0 %}
+            <h4 style="color:red">Вы успешно зарегистрированы. Выполните вход</h4>
+        {% endif %}
+
+
+        {% if not (error == 0) %}
+
+        <p>
+            {{ form.user_name.label }}<br>
+            {{ form.user_name }}<br>
+            {% for error in form.user_name.errors %}
+                <div class="alert alert-danger" role="alert">
+                    {{ error }}
+                </div>
+            {% endfor %}
+        </p>
+
+        <p>
+            {{ form.password.label }}<br>
+            {{ form.password }}<br>
+            {{ form.password_check.label}}<br>
+            {{ form.password_check}}<br>
+            {% for error in form.password.errors %}
+                <div class="alert alert-danger" role="alert">
+                    {{ error }}
+                </div>
+            {% endfor %}
+
+        </p>
+        <p>{{ form.submit() }} <strong> <a href="/login" style="color:black">Я уже зарегистрирован(а)</a></strong></p>
+        {% else %}
+        <a class="btn btn-primary" href="/login" role="button"> Войти </a>
+        {% endif %}
+    </form>
+
+{% endblock %}

@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1>Привет, {{ username }}!</h1>
+{% for item in news %}
+<div class="alert alert-dark" role="alert">
+    <h2>Название: {{item.title}}</h2>
+    <div>Описание: {{item.description}}</div>
+    <div>Дедлайн: {{item.deadline}}</div>
+    <div>Исполнитель: {{item.performer_name}}</div>
+<p> <strong> <a href="/add_task/{{ item.id }}" style="color:black">Редактировать</a></strong></p>
+<p> <strong> <a href="/delete_task/{{ item.id }}" style="color:red">Удалить</a></strong></p>
+</div>
+{% endfor %}
+
+{% endblock %}

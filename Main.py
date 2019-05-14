@@ -21,9 +21,9 @@ def index():
     user_name = database.get_session(request.user_id, 'user_name')[0]
     user = User.query.filter_by(username=user_name).first()
     task = Task.query.filter_by(user_id=user.id).all()
-    task = [x for x in task if datetime.strptime(x.deadline, '%m %d %Y, %H:%M:%S') < datetime.now()]
+    bad = [x for x in task if datetime.strptime(x.deadline, '%m %d %Y, %H:%M:%S') < datetime.now()]
     return render_template('index.html', username=session['username'],
-                           news=tasks)
+                           news=tasks, bad=bad)
 
 
 @app.route('/register', methods=['POST', 'GET'])
@@ -131,7 +131,7 @@ def add_task(f):
                 done = False
             else:
                 done = True
-            datetime_string_format = '%b %d %Y, %H:%M:%S'
+            datetime_string_format = '%d.%m.%Y %H:%M'
             task = Task(user_id=session['user_id'], title=title,
                         description=description,
                         deadline=deadline.strftime(datetime_string_format),

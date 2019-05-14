@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1>{{ title }}</h1>
+<form action="" method="post" novalidate>
+    {{ form.hidden_tag() }}
+    <p>
+        {{ form.title.label }}<br>
+        {{ form.title }}<br>
+        {% for error in form.title.errors %}
+    <div class="alert alert-danger" role="alert">
+        {{ error }}
+    </div>
+    {% endfor %}
+    </p>
+    <p>
+        {{ form.description.label }}<br>
+        {{ form.description }}<br>
+        {% for error in form.description.errors %}
+    <div class="alert alert-danger" role="alert">
+        {{ error }}
+    </div>
+    {% endfor %}
+        {{ form.deadline.label }}<br>
+        {{ form.deadline }}<br>
+        {% for error in form.deadline.errors %}
+    <div class="alert alert-danger" role="alert">
+        {{ error }}
+    </div>
+    {% endfor %}
+        {{ form.performer_name.label }}<br>
+        {{ form.performer_name }}<br>
+        {% for error in form.performer_name.errors %}
+    <div class="alert alert-danger" role="alert">
+        {{ error }}
+    </div>
+    {% endfor %}
+        {{ form.category_name.label }}<br>
+        {{ form.category_name }}<br>
+        {% for error in form.category_name.errors %}
+    <div class="alert alert-danger" role="alert">
+        {{ error }}
+    </div>
+    {% endfor %}
+        {{ form.priority.label }}<br>
+        {{ form.priority }}<br>
+        {% for error in form.priority.errors %}
+    <div class="alert alert-danger" role="alert">
+        {{ error }}
+    </div>
+    {% endfor %}
+        {{ form.step.label }}<br>
+        {{ form.step }}<br>
+        {% for error in form.step.errors %}
+    <div class="alert alert-danger" role="alert">
+        {{ error }}
+    </div>
+    {% endfor %}
+        {{ form.done.label }}<br>
+        {{ form.done }}<br>
+        {% for error in form.done.errors %}
+    <div class="alert alert-danger" role="alert">
+        {{ error }}
+    </div>
+    {% endfor %}
+
+
+
+    <p>{{ form.submit() }}</p>
+</form>
+{% endblock %}
