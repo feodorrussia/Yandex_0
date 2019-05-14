@@ -13,16 +13,14 @@ from json import load
 
 
 @app.route('/')
-@app.route('/title')
-def title():
-    session.pop('username', 0)
-    session.pop('user_id', 0)
-    if 'username' not in session:
-        return render_template('title_out.html')
-    if session['user_id'] == 1:
-        return redirect("/title_admin")
-    return render_template('title_in.html', text1=open('text_init.txt').read(),
-                           username=session['username'])
+@app.route('/index/', methods=['POST', 'GET'])
+def index():
+    if request.method == 'GET':
+        if 'username' not in session:
+            if "username" in session:
+                return redirect("/logout")
+            return redirect('/login')
+        return redirect('/register')
 
 
 @app.route('/login', methods=['POST', 'GET'])
@@ -58,6 +56,11 @@ def register():
         else:
             return render_template('register.html', form=form, error=1)
     return render_template('register.html', form=form)
+
+
+@app.route('/add_task')
+def add_task():
+    return render_template('add_task.html')
 
 
 if __name__ == '__main__':

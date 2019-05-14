@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1>Оформление заказа</h1>
+
+<head>
+    <meta charset="UTF-8"/>
+    <title>Document</title>
+    <style>
+    .hiden{
+      display:none;
+    }
+    .hiden:target{
+      display:block;
+    }
+    }
+
+
+
+
+
+    </style>
+</head>
+
+
+<form method="post" enctype="multipart/form-data">
+    <input class="form-control" id="order" placeholder="Введите назвение задачи*" name="order">
+    <h3>Описание задачи*</h3>
+    <div class="form-group">
+        <textarea class="form-control" id="about" rows="3" name="about"></textarea>
+    </div>
+
+    <button type="submit" class="btn btn-primary">Отправить</button><a class="navbar-brand" href="/title">Главная</a>
+</form>
+{% endblock %}
