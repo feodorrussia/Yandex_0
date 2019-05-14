@@ -6,6 +6,8 @@ from database import *
 par_task=['id', 'user_id', 'title', 'description', 'deadline', 'performer_id', 'category_id', 'priority', 'step', 'done']
 
 def handle_dialog(request, response, user_storage, database):
+    if not user_storage:
+        user_storage = {"suggests": ['Помощь']}
     input_message = request.command.lower()
 
     if request.user_id not in database.get_session(all=True):
@@ -16,16 +18,16 @@ def handle_dialog(request, response, user_storage, database):
         user_storage = {'suggests': ['Помощь']}
         database.update_status_system('login', request.user_id)
         return message_return(response, user_storage, output_message)
-
-    if input_message.split(' ') == 2 and database.get_session(request.user_id, 'status_action')[
+    if len(input_message.split(' ')) == 2 and database.get_session(request.user_id, 'status_action')[
         0] == 'login':
         input_message = request.command.split(' ')
         user = User.query.filter_by(username=input_message[0]).first()
+        print(user, input_message)
         if user:
-            if input_message[1] == user.password():
+            if input_message[1] == user.password:
                 output_message = f"Добро пожаловать {input_message[0]}"
                 user_storage = {'suggests': ['Посмотреть задачи', 'Добавить задачу', 'Помощь']}
-                database.add_sessions(request.user_id, input_message[0])
+                database.update_status_system(input_message[0], request.user_id, 'user_name')
                 database.update_status_system('first', request.user_id)
                 return message_return(response, user_storage, output_message)
             else:
@@ -37,19 +39,35 @@ def handle_dialog(request, response, user_storage, database):
             user_storage = {'suggests': ['Помощь']}
             return message_return(response, user_storage, output_message)
 
-    if database.get_session(request.user_id, 'status_action')[0] == 'first':
-        if input_message == 'покажи мои задачи':
-            user_name = database.get_session(request.user_id, 'user_name')
-            user_id = User.query.filter_by(username=user_name).first()
-            task = Task.query.filter_by(user_id=user_id)
-            output_message = f"Прошу! Ваши задачи:\n" + '\n'.join([str(x.name)+"\n  "+str(x.id)+"\n  "+str(x.deadline) for x in task])
-            user_storage = {'suggests': ['Посмотреть задачи', 'Добавить задачу', 'Помощь']}
-            database.add_sessions(request.user_id, input_message[0])
+    if input_message in ['главная', 'отбой, давай на главную']:
+        output_message = "Прошу)"
+        if database.get_session(request.user_id, 'status_action')[0] == 'login':
+            user_storage = {'suggests': ['Помощь', 'Войти']}
+        else:
             database.update_status_system('first', request.user_id)
-            return message_return(response, user_storage, output_message)
+            user_storage = {
+                'suggests': ['Посмотреть задачи', 'Добавить задачу', 'Помощь']}
+        database.update_status_system('working', request.user_id, 'status_action')
+        return message_return(response, user_storage, output_message)
+
+    if database.get_session(request.user_id, 'status_action')[0] == 'first':
+        if input_message in ['покажи мои задачи', 'посмотреть задачи']:
+            user_name = database.get_session(request.user_id, 'user_name')[0]
+            user = User.query.filter_by(username=user_name).first()
+            task = Task.query.filter_by(user_id=user.id).all()
+            if len(task)>0:
+                output_message = "Прошу! Ваши задачи:\n" + '\n'.join([str(x.name)+"\n  "+str(x.id)+"\n  "+str(x.deadline) for x in task])
+                user_storage = {'suggests': ['Помощь', 'Главная']}
+                database.update_status_system('monitoring_tasks', request.user_id)
+                return message_return(response, user_storage, output_message)
+            else:
+                output_message = "Прости, но я не нашла ни одной твоей задачи.\nНо ты можешь добавить новую!"
+                user_storage = {'suggests': ['Добавить', 'Помощь', 'Главная']}
+                database.update_status_system('monitoring_tasks', request.user_id)
+                return message_return(response, user_storage, output_message)
 
         '''if 'покажи задачу номер' in input_message and input_message.strip().split(' ') == 4:
-            task_id = input_message.strip().split(' ')[-1]
+            task_id = int(input_message.strip().split(' ')[-1])
             task = Task.query.filter_by(id=task_id).first()
             output_message = f"Прошу! Ваша задача:\n" + '\n'.join([str(task.name), str(task.description)[:500], str(task.deadline), str(task.)])
             user_storage = {'suggests': ['Посмотреть задачи', 'Добавить задачу', 'Помощь']}
@@ -57,8 +75,48 @@ def handle_dialog(request, response, user_storage, database):
             database.update_status_system('first', request.user_id)
             return message_return(response, user_storage, output_message)'''
 
+    if input_message in ['добавить', 'добавить задачу']:
+        output_message = "Хорошо! Говори название"
+        user_storage = {'suggests': ['Отмена', 'Помощь', 'Главная']}
+        database.update_status_system('add_task_name', request.user_id)
+        return message_return(response, user_storage, output_message)
+
+    if input_message == '' and database.get_session(request.user_id, 'status_action')[0] in []:
+        output_message = "Хорошо."
+        user_storage = {'suggests': ['Посмотреть задачи', 'Добавить задачу', 'Помощь', 'Главная']}
+        database.update_status_system('add_task_finish', request.user_id)
+        return message_return(response, user_storage, output_message)
+
+    if database.get_session(request.user_id, 'status_action')[0] == 'add_task_name':
+        name = request.command
+        output_message = "Хорошо! Говори описание"
+        user_storage = {'suggests': ['Отмена', 'Помощь', 'Главная']}
+        database.update_status_system('add_task_description', request.user_id)
+        return message_return(response, user_storage, output_message)
+
+    if database.get_session(request.user_id, 'status_action')[0] == 'add_task_description':
+        description = request.command
+        output_message = "Хорошо! Говори категорию"
+        user_storage = {'suggests': ['Отмена', 'Помощь', 'Главная']}
+        database.update_status_system('add_task_category', request.user_id)
+        return message_return(response, user_storage, output_message)
+
+    if database.get_session(request.user_id, 'status_action')[0] == 'add_task_category':
+        category = request.command
+        output_message = "Хорошо! Говори дату выполнения"
+        user_storage = {'suggests': ['Отмена', 'Помощь', 'Главная']}
+        database.update_status_system('add_task_deadline', request.user_id)
+        return message_return(response, user_storage, output_message)
+
+    if database.get_session(request.user_id, 'status_action')[0] == 'add_task_deadline':
+        deadline = request.command
+        output_message = "Готово!"
+        user_storage = {'suggests': ['Посмотреть задачи', 'Добавить задачу', 'Помощь', 'Главная']}
+        database.update_status_system('add_task_finish', request.user_id)
+        return message_return(response, user_storage, output_message)
+
+
     buttons, user_storage = get_suggests(user_storage)
     return message_error(response, user_storage,
                          ['Конфуз;) Я ещё в разработке', 'Ой, сейчас исправлю)'
                           ])
-

@@ -20,8 +20,7 @@ from flask import Flask, request
 # Импортируем базу данных
 import database_module
 
-# Инициализируем "приложение" для самого веб-сервиса
-app = Flask(__name__)
+from constants import*
 
 # Хранилище данных о сессиях.
 session_storage = {}
